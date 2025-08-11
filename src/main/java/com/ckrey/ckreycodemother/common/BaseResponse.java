@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
-public class BaseReponse <T> implements Serializable {
+public class BaseResponse<T> implements Serializable {
 
     private Integer code;
 
@@ -17,7 +17,7 @@ public class BaseReponse <T> implements Serializable {
     private String message;
 
 
-    public BaseReponse(ErrorCode errorCode){
+    public BaseResponse(ErrorCode errorCode){
        this(errorCode.getCode(),null,errorCode.getMessage());
     }
 

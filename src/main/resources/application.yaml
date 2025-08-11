@@ -1,6 +1,13 @@
 spring:
   application:
     name: ckrey-code-mother
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
+    username: postgres.pollrxffbmhccdjxvpco
+    password: dd8857356
+  profiles:
+    active: local
 server:
   port: 8888
   servlet:
@@ -22,3 +29,6 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+logger:
+    level:
+      com.ckrey.ckreycodemother: debug
