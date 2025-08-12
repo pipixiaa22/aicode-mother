@@ -29,11 +29,8 @@ class AiCodeGeneratorFacadeTest {
 
     @Test
     void codeGenerateAndSave() {
-        reactor.core.publisher.Flux<String> stringFlux = aiCodeGeneratorFacade.codeGenerateAndSave("帮我帮我做一个简单的博客，不超过20行", CodeGenTypeEnum.MULTI_FILE);
-
-        List<String> block = stringFlux.collectList().block();
-
+        Flux<String> test = aiCodeGeneratorFacade.codeGenerateAndSaveStream("帮我写一个简单的博客，不超过20行代码", CodeGenTypeEnum.MULTI_FILE);
+        List<String> block = test.collectList().block();
         Assertions.assertNotNull(block);
-
     }
 }

@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+@Deprecated
 public class CodeFileSaver {
     //文件保存的根目录
     private static final String SAVE_DIR = System.getProperty("user.dir") + "/tmp/code_output";

@@ -5,7 +5,7 @@ import com.ckrey.ckreycodemother.ai.model.MultiFileCodeResult;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class CodeParserTest {
+class CodeParser2Test {
 
     @Test
     void parseHtmlCode() {
@@ -24,7 +24,7 @@ class CodeParserTest {
                 ```
                 随便写一段描述
                 """;
-        HtmlCodeResult result = CodeParser.parseHtmlCode(codeContent);
+        HtmlCodeResult result = CodeParser2.parseHtmlCode(codeContent);
         Assertions.assertNotNull(result);
     }
 
@@ -56,7 +56,7 @@ class CodeParserTest {
                 ```
                 文件创建完成！
                 """;
-        MultiFileCodeResult result = CodeParser.parseMultiFileCode(codeContent);
+        MultiFileCodeResult result = CodeParser2.parseMultiFileCode(codeContent);
         Assertions.assertNotNull(result);
     }
 }
