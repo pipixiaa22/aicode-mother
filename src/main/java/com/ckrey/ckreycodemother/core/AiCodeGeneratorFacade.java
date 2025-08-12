@@ -24,8 +24,6 @@ public class AiCodeGeneratorFacade {
     @Resource
     private AiCodeGeneratorService aiCodeGeneratorService;
 
-    private static final AiCodeGenerate aiCodeGenerate = new AiCodeGenerate();
-
 
     public Flux<String> codeGenerateAndSaveStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum) {
         if (StrUtil.isBlank(userMessage)) {
