@@ -28,11 +28,11 @@ public abstract class CodeFileSaverTemplate<T> {
     protected abstract void saveFiles(T result, String dir);
 
     //模板方法
-    public final File save(T result) {
+    public final File save(T result,Long appId) {
         //验证输入
         revalidate(result);
         //定义保存目录
-        String dir = buildUniqueDir();
+        String dir = buildUniqueDir(appId);
         //保存文件
         saveFiles(result, dir);
         //返回目录对象
@@ -40,10 +40,14 @@ public abstract class CodeFileSaverTemplate<T> {
     }
 
 
-    private String buildUniqueDir() {
+    private String buildUniqueDir(Long appId) {
+        if (appId == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"appId 不能为空");
+        }
         String bizType = getCodeType().getValue();
+
         //这只是文件名字，文件路径还需要额外加上SAVE_DIR
-        String uniqueDirName = StrUtil.format("{}_{}", bizType, IdUtil.getSnowflakeNextIdStr());
+        String uniqueDirName = StrUtil.format("{}_{}", bizType, appId);
         String dir = SAVE_DIR + File.separator + uniqueDirName;
         Path path = Paths.get(dir);
         try {

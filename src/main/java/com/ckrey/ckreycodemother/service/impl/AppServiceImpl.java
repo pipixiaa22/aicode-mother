@@ -1,10 +1,12 @@
 package com.ckrey.ckreycodemother.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.model.dto.app.AppQueryRequest;
 import com.ckrey.ckreycodemother.model.entity.User;
+import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.model.vo.AppVO;
 import com.ckrey.ckreycodemother.model.vo.UserVO;
 import com.ckrey.ckreycodemother.service.UserService;
@@ -15,6 +17,7 @@ import com.ckrey.ckreycodemother.mapper.AppMapper;
 import com.ckrey.ckreycodemother.service.AppService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private AiCodeGeneratorFacade aiCodeGeneratorFacade;
 
     @Override
     public AppVO getAppVo(App app) {
@@ -85,11 +91,40 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
         return appList.stream().map((app) -> {
             AppVO appVo = new AppVO();
-            BeanUtil.copyProperties(app,appVo);
+            BeanUtil.copyProperties(app, appVo);
             appVo.setUser(userVOMap.get(app.getUserId()));
             return appVo;
         }).toList();
 
     }
 
+    @Override
+    public Flux<String> chatToGenCode(String userMessage, Long appId, User loginUser) {
+        //校验参数
+        if (userMessage == null || appId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        //查询app信息
+
+        App app = this.getById(appId);
+
+        if (app == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        //仅限本用户继续对话
+
+        if (!app.getUserId().equals(loginUser.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限访问该应用");
+        }
+
+        String codeGenType = app.getCodeGenType();
+        CodeGenTypeEnum enumByValue = CodeGenTypeEnum.getEnumByValue(codeGenType);
+
+        //发送请求到ai服务器
+
+        return aiCodeGeneratorFacade.codeGenerateAndSaveStream(userMessage, enumByValue, appId);
+
+
+    }
 }

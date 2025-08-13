@@ -105,7 +105,7 @@ public class App implements Serializable {
     /**
      * 是否删除
      */
-    @Column("isDelete")
-    private Integer isDelete;
+    @Column(value = "isDelete",isLogicDelete = true)
+    private Boolean isDelete;
 
 }

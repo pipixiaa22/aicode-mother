@@ -14,10 +14,10 @@ public class CodeFileSaverExecutor {
     private static final MultFileCodeFileSaverTemplate multFileCodeSaver = new MultFileCodeFileSaverTemplate();
 
 
-    public static File executorSaver(Object result, CodeGenTypeEnum codeGenTypeEnum) {
+    public static File executorSaver(Object result, CodeGenTypeEnum codeGenTypeEnum,Long appId) {
         return switch (codeGenTypeEnum) {
-            case MULTI_FILE -> multFileCodeSaver.save(((MultiFileCodeResult) result));
-            case HTML -> htmlCodeFileSaver.save((HtmlCodeResult) result);
+            case MULTI_FILE -> multFileCodeSaver.save(((MultiFileCodeResult) result),appId);
+            case HTML -> htmlCodeFileSaver.save((HtmlCodeResult) result,appId);
             default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的保存类型");
         };
     }
