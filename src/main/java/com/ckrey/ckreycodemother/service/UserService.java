@@ -1,6 +1,6 @@
 package com.ckrey.ckreycodemother.service;
 
-import com.ckrey.ckreycodemother.model.dto.UserRegisterRequest;
+import com.ckrey.ckreycodemother.model.dto.user.UserRegisterRequest;
 import com.ckrey.ckreycodemother.model.dto.user.UserQueryRequest;
 import com.ckrey.ckreycodemother.model.vo.LoginUserVO;
 import com.ckrey.ckreycodemother.model.vo.UserVO;

@@ -9,7 +9,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class Codegen {
 
-    private static final String[] TABLE_NAMES = {"user"};
+    private static final String[] TABLE_NAMES = {"app"};
 
     public static void main(String[] args) {
         //配置数据源

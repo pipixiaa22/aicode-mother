@@ -3,7 +3,7 @@ package com.ckrey.ckreycodemother.common;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 
-public class ReponseUtil {
+public class ResponseUtil {
 
 
 

@@ -1,7 +1,7 @@
 package com.ckrey.ckreycodemother.controller;
 
 import com.ckrey.ckreycodemother.common.BaseResponse;
-import com.ckrey.ckreycodemother.common.ReponseUtil;
+import com.ckrey.ckreycodemother.common.ResponseUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,6 +10,6 @@ public class HealthController {
 
     @GetMapping("/test")
     public BaseResponse<String> test(){
-        return ReponseUtil.success("hello");
+        return ResponseUtil.success("hello");
     }
 }

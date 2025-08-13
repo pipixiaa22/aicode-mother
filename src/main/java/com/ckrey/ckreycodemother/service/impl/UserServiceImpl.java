@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.exception.ThrowUtils;
-import com.ckrey.ckreycodemother.model.dto.UserRegisterRequest;
+import com.ckrey.ckreycodemother.model.dto.user.UserRegisterRequest;
 import com.ckrey.ckreycodemother.model.dto.user.UserQueryRequest;
 import com.ckrey.ckreycodemother.model.enums.UserRoleEnum;
 import com.ckrey.ckreycodemother.model.vo.LoginUserVO;

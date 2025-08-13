@@ -4,13 +4,13 @@ import cn.hutool.core.bean.BeanUtil;
 import com.ckrey.ckreycodemother.annotaion.AuthCheck;
 import com.ckrey.ckreycodemother.common.BaseResponse;
 import com.ckrey.ckreycodemother.common.DeleteRequest;
-import com.ckrey.ckreycodemother.common.ReponseUtil;
+import com.ckrey.ckreycodemother.common.ResponseUtil;
 import com.ckrey.ckreycodemother.constant.UserConstant;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.exception.ThrowUtils;
-import com.ckrey.ckreycodemother.model.dto.UserLoginRequest;
-import com.ckrey.ckreycodemother.model.dto.UserRegisterRequest;
+import com.ckrey.ckreycodemother.model.dto.user.UserLoginRequest;
+import com.ckrey.ckreycodemother.model.dto.user.UserRegisterRequest;
 import com.ckrey.ckreycodemother.model.dto.user.UserAddRequest;
 import com.ckrey.ckreycodemother.model.dto.user.UserQueryRequest;
 import com.ckrey.ckreycodemother.model.dto.user.UserUpdateRequest;
@@ -55,7 +55,7 @@ public class UserController {
     public BaseResponse<Long> registerUser(@RequestBody UserRegisterRequest registerRequest) {
         ThrowUtils.throwIf(registerRequest == null, new BusinessException(ErrorCode.PARAMS_ERROR));
         long userId = userService.registerUser(registerRequest);
-        return ReponseUtil.success(userId);
+        return ResponseUtil.success(userId);
     }
 
 
@@ -65,21 +65,21 @@ public class UserController {
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
-        return ReponseUtil.success(loginUserVO);
+        return ResponseUtil.success(loginUserVO);
     }
 
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
         boolean result = userService.userLogout(request);
-        return ReponseUtil.success(result);
+        return ResponseUtil.success(result);
     }
 
 
     @GetMapping("/get/login")
     public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
         LoginUserVO loginUserVO = userService.getLoginUserVO(userService.getLoginUser(request));
-        return ReponseUtil.success(loginUserVO);
+        return ResponseUtil.success(loginUserVO);
     }
 
 
@@ -95,7 +95,7 @@ public class UserController {
 
         result.setRecords(userVoList);
 
-        return ReponseUtil.success(result);
+        return ResponseUtil.success(result);
     }
 
 
@@ -114,7 +114,7 @@ public class UserController {
         user.setUserpassword(encryptPassword);
         boolean result = userService.save(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        return ReponseUtil.success(user.getId());
+        return ResponseUtil.success(user.getId());
     }
 
     /**
@@ -126,7 +126,7 @@ public class UserController {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         User user = userService.getById(id);
         ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
-        return ReponseUtil.success(user);
+        return ResponseUtil.success(user);
     }
 
     /**
@@ -136,7 +136,7 @@ public class UserController {
     public BaseResponse<UserVO> getUserVOById(long id) {
         BaseResponse<User> response = getUserById(id);
         User user = response.getData();
-        return ReponseUtil.success(userService.getUserVo(user));
+        return ResponseUtil.success(userService.getUserVo(user));
     }
 
     /**
@@ -149,7 +149,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean b = userService.removeById(deleteRequest.getId());
-        return ReponseUtil.success(b);
+        return ResponseUtil.success(b);
     }
 
     /**
@@ -165,7 +165,7 @@ public class UserController {
         BeanUtil.copyProperties(userUpdateRequest, user);
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        return ReponseUtil.success(true);
+        return ResponseUtil.success(true);
     }
 
     /**
