@@ -1,7 +1,11 @@
 package com.ckrey.ckreycodemother.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
+import com.ckrey.ckreycodemother.core.constant.AppConstant;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.model.dto.app.AppQueryRequest;
@@ -19,8 +23,17 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -126,5 +139,54 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         return aiCodeGeneratorFacade.codeGenerateAndSaveStream(userMessage, enumByValue, appId);
 
 
+    }
+
+    @Override
+    public String deployApp(Long appId, User loginUser) {
+        //获取app实例
+        App app = this.getById(appId);
+        //判断是否为当前用户
+        if (!app.getUserId().equals(loginUser.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限部署该应用");
+        }
+        //检查是否已有部署deploykey,如果有,则直接在此基础上修改,如果没有生成一个并回填
+        String deployKey = app.getDeployKey();
+        if (StrUtil.isBlank(deployKey)) {
+            deployKey = RandomUtil.randomString(6);
+            app.setDeployKey(deployKey);
+        }
+        //获取应用类型
+        String codeGenType = app.getCodeGenType();
+        //根据appid找到对应目录下的文件
+        String output_dir = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + StrUtil.format("{}_{}",codeGenType,appId);
+
+        File source = new File(output_dir);
+        //检查路径是否存在
+
+        if (!source.exists() || !source.isDirectory()){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"文件路径错误");
+        }
+
+
+        String deploy_dir = AppConstant.CODE_DEPLOY_ROOT_DIR + File.separator + deployKey;
+
+        File target = new File(deploy_dir);
+
+        try {
+            FileUtil.copyContent(source,target,true);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
+        }
+        //重新写回app,填充deployid
+        app.setDeployedTime(Timestamp.valueOf(LocalDateTime.now()));
+
+        boolean update = this.updateById(app);
+
+        if (!update) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "数据库更新失败");
+        }
+
+        //返回url地址
+        return StrUtil.format("{}/{}",AppConstant.CODE_DEPLOY_HOST,deployKey);
     }
 }

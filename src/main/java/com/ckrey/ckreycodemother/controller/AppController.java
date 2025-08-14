@@ -29,6 +29,10 @@ import com.ckrey.ckreycodemother.service.AppService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,6 +76,20 @@ public class AppController {
         ));
 
     }
+
+    //返回部署的地址即可
+    @PostMapping("/deploy")
+    public BaseResponse<String> deployApp(@RequestBody AppDeployRequest appDeployRequest, HttpServletRequest request) {
+        if (appDeployRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long appId = appDeployRequest.getAppId();
+        User loginUser = userService.getLoginUser(request);
+
+        String deployDir = appService.deployApp(appId, loginUser);
+        return ResponseUtil.success(deployDir);
+    }
+
 
     /**
      * 创建应用
