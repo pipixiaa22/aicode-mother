@@ -3,6 +3,7 @@ package com.ckrey.ckreycodemother.core.saver;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.ckrey.ckreycodemother.core.constant.AppConstant;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
@@ -16,6 +17,12 @@ import java.nio.file.Paths;
 
 public abstract class CodeFileSaverTemplate<T> {
     private static final String SAVE_DIR = System.getProperty("user.dir") + "/tmp/code_output";
+
+    // 文件保存根目录
+    protected static final String FILE_SAVE_ROOT_DIR = AppConstant.CODE_OUTPUT_ROOT_DIR;
+
+
+    // 应用生成根目录（用于浏览）
 
 
     private void revalidate(T result) {
