@@ -8,11 +8,14 @@ import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
 import com.ckrey.ckreycodemother.core.constant.AppConstant;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
+import com.ckrey.ckreycodemother.exception.ThrowUtils;
 import com.ckrey.ckreycodemother.model.dto.app.AppQueryRequest;
 import com.ckrey.ckreycodemother.model.entity.User;
+import com.ckrey.ckreycodemother.model.enums.ChatHistoryMessageTypeEnum;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.model.vo.AppVO;
 import com.ckrey.ckreycodemother.model.vo.UserVO;
+import com.ckrey.ckreycodemother.service.ChatHistoryService;
 import com.ckrey.ckreycodemother.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -20,12 +23,14 @@ import com.ckrey.ckreycodemother.model.entity.App;
 import com.ckrey.ckreycodemother.mapper.AppMapper;
 import com.ckrey.ckreycodemother.service.AppService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +49,7 @@ import java.util.stream.Collectors;
  * @since 2025-08-12
  */
 @Service
+@Slf4j
 public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppService {
 
     @Resource
@@ -51,6 +57,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
+
+    @Resource
+    private ChatHistoryService chatHistoryService;
 
     @Override
     public AppVO getAppVo(App app) {
@@ -133,11 +142,27 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
         String codeGenType = app.getCodeGenType();
         CodeGenTypeEnum enumByValue = CodeGenTypeEnum.getEnumByValue(codeGenType);
+        //第一个存的是用户消息
+        boolean addUserMes = chatHistoryService.addChatMessage(appId, userMessage, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
+
+        ThrowUtils.throwIf(!addUserMes, ErrorCode.OPERATION_ERROR, "存储用户消息失败");
 
         //发送请求到ai服务器
+        //这里照样对flux流式处理
+        Flux<String> stringFlux = aiCodeGeneratorFacade.codeGenerateAndSaveStream(userMessage, enumByValue, appId);
+        StringBuilder stringBuilder = new StringBuilder();
+        return stringFlux.doOnNext(stringBuilder::append)
+                .doOnComplete(() -> {
+                    String aiResponse = stringBuilder.toString();
+                    boolean aiMessage = chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+                    ThrowUtils.throwIf(!aiMessage, ErrorCode.OPERATION_ERROR, "存储ai消息失败");
 
-        return aiCodeGeneratorFacade.codeGenerateAndSaveStream(userMessage, enumByValue, appId);
-
+                }).doOnError(error -> {
+                    String aiResponse = stringBuilder.toString();
+                    chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+                    error.printStackTrace();
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "ai 回复失败" + error.getMessage());
+                });
 
     }
 
@@ -158,13 +183,13 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         //获取应用类型
         String codeGenType = app.getCodeGenType();
         //根据appid找到对应目录下的文件
-        String output_dir = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + StrUtil.format("{}_{}",codeGenType,appId);
+        String output_dir = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + StrUtil.format("{}_{}", codeGenType, appId);
 
         File source = new File(output_dir);
         //检查路径是否存在
 
-        if (!source.exists() || !source.isDirectory()){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"文件路径错误");
+        if (!source.exists() || !source.isDirectory()) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件路径错误");
         }
 
 
@@ -173,7 +198,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         File target = new File(deploy_dir);
 
         try {
-            FileUtil.copyContent(source,target,true);
+            FileUtil.copyContent(source, target, true);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
         }
@@ -187,6 +212,23 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         }
 
         //返回url地址
-        return StrUtil.format("{}/{}",AppConstant.CODE_DEPLOY_HOST,deployKey);
+        return StrUtil.format("{}/{}", AppConstant.CODE_DEPLOY_HOST, deployKey);
+    }
+
+
+    /**
+     * 关联删除app历史对话记录
+     * @param id
+     * @return
+     */
+    @Override
+    public boolean removeById(Serializable id) {
+        try {
+            chatHistoryService.deleteChatMessage((Long) id);
+        } catch (Exception e) {
+            log.error("删除历史对话记录失败,{}",e.getMessage());
+        }
+
+        return super.removeById(id);
     }
 }

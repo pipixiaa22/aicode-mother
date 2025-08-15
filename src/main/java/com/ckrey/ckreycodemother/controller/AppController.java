@@ -15,6 +15,7 @@ import com.ckrey.ckreycodemother.exception.ThrowUtils;
 import com.ckrey.ckreycodemother.model.entity.User;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.model.vo.AppVO;
+import com.ckrey.ckreycodemother.service.ChatHistoryService;
 import com.ckrey.ckreycodemother.service.UserService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -48,11 +49,13 @@ import java.util.Map;
 @RequestMapping("/app")
 public class AppController {
 
-    @Autowired
+    @Resource
     private AppService appService;
 
     @Resource
     private UserService userService;
+
+    private ChatHistoryService chatHistoryService;
 
 
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -170,8 +173,9 @@ public class AppController {
         if (!app.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "无权限");
         }
-
+        //TODO这里重写了removeid方法，在里面也删除了关联的历史记录
         boolean removed = appService.removeById(app.getId());
+
 
         if (!removed) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "删除失败");
@@ -237,6 +241,9 @@ public class AppController {
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
         boolean removed = appService.removeById(id);
         ThrowUtils.throwIf(!removed, ErrorCode.OPERATION_ERROR, "app数据删除失败");
+
+//
+
         return ResponseUtil.success(true);
     }
 

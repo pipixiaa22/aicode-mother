@@ -1,63 +1,92 @@
--- Ó¦ÓÃ±í
+-- Ó¦ï¿½Ã±ï¿½
 create table app
 (
     id           bigint auto_increment comment 'id' primary key,
-    appName      varchar(256)                       null comment 'Ó¦ÓÃÃû³Æ',
-    cover        varchar(512)                       null comment 'Ó¦ÓÃ·âÃæ',
-    initPrompt   text                               null comment 'Ó¦ÓÃ³õÊ¼»¯µÄ prompt',
-    codeGenType  varchar(64)                        null comment '´úÂëÉú³ÉÀàĞÍ£¨Ã¶¾Ù£©',
-    deployKey    varchar(64)                        null comment '²¿Êğ±êÊ¶',
-    deployedTime datetime                           null comment '²¿ÊğÊ±¼ä',
-    priority     int      default 0                 not null comment 'ÓÅÏÈ¼¶',
-    userId       bigint                             not null comment '´´½¨ÓÃ»§id',
-    editTime     datetime default CURRENT_TIMESTAMP not null comment '±à¼­Ê±¼ä',
-    createTime   datetime default CURRENT_TIMESTAMP not null comment '´´½¨Ê±¼ä',
-    updateTime   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '¸üĞÂÊ±¼ä',
-    isDelete     tinyint  default 0                 not null comment 'ÊÇ·ñÉ¾³ı',
-    UNIQUE KEY uk_deployKey (deployKey), -- È·±£²¿Êğ±êÊ¶Î¨Ò»
-    INDEX idx_appName (appName),         -- ÌáÉı»ùÓÚÓ¦ÓÃÃû³ÆµÄ²éÑ¯ĞÔÄÜ
-    INDEX idx_userId (userId)            -- ÌáÉı»ùÓÚÓÃ»§ ID µÄ²éÑ¯ĞÔÄÜ
-) comment 'Ó¦ÓÃ' collate = utf8mb4_unicode_ci;
+    appName      varchar(256)                       null comment 'Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
+    cover        varchar(512)                       null comment 'Ó¦ï¿½Ã·ï¿½ï¿½ï¿½',
+    initPrompt   text                               null comment 'Ó¦ï¿½Ã³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ prompt',
+    codeGenType  varchar(64)                        null comment 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½Ã¶ï¿½Ù£ï¿½',
+    deployKey    varchar(64)                        null comment 'ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶',
+    deployedTime datetime                           null comment 'ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½',
+    priority     int      default 0                 not null comment 'ï¿½ï¿½ï¿½È¼ï¿½',
+    userId       bigint                             not null comment 'ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½id',
+    editTime     datetime default CURRENT_TIMESTAMP not null comment 'ï¿½à¼­Ê±ï¿½ï¿½',
+    createTime   datetime default CURRENT_TIMESTAMP not null comment 'ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½',
+    updateTime   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment 'ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½',
+    isDelete     tinyint  default 0                 not null comment 'ï¿½Ç·ï¿½É¾ï¿½ï¿½',
+    UNIQUE KEY uk_deployKey (deployKey), -- È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶Î¨Ò»
+    INDEX idx_appName (appName),         -- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ÆµÄ²ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
+    INDEX idx_userId (userId)            -- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ ID ï¿½Ä²ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
+) comment 'Ó¦ï¿½ï¿½' collate = utf8mb4_unicode_ci;
 
 
--- Ó¦ÓÃ±í
--- Ó¦ÓÃ±í
+-- Ó¦ï¿½Ã±ï¿½
+-- Ó¦ï¿½Ã±ï¿½
 create table app
 (
     "id"           bigserial primary key, -- id
-    "appName"      varchar(256),          -- Ó¦ÓÃÃû³Æ
-    "cover"        varchar(512),          -- Ó¦ÓÃ·âÃæ
-    "initPrompt"   text,                  -- Ó¦ÓÃ³õÊ¼»¯µÄ prompt
-    "codeGenType"  varchar(64),           -- ´úÂëÉú³ÉÀàĞÍ£¨Ã¶¾Ù£©
-    "deployKey"    varchar(64),           -- ²¿Êğ±êÊ¶
-    "deployedTime" timestamp,             -- ²¿ÊğÊ±¼ä
-    "priority"     integer default 0 not null, -- ÓÅÏÈ¼¶
-    "userId"       bigint not null,       -- ´´½¨ÓÃ»§id
-    "editTime"     timestamp default CURRENT_TIMESTAMP not null, -- ±à¼­Ê±¼ä
-    "createTime"   timestamp default CURRENT_TIMESTAMP not null, -- ´´½¨Ê±¼ä
-    "updateTime"   timestamp default CURRENT_TIMESTAMP not null, -- ¸üĞÂÊ±¼ä
-    "isDelete"     smallint default 0 not null, -- ÊÇ·ñÉ¾³ı
-    UNIQUE ("deployKey"), -- È·±£²¿Êğ±êÊ¶Î¨Ò»
+    "appName"      varchar(256),          -- Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    "cover"        varchar(512),          -- Ó¦ï¿½Ã·ï¿½ï¿½ï¿½
+    "initPrompt"   text,                  -- Ó¦ï¿½Ã³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ prompt
+    "codeGenType"  varchar(64),           -- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½Ã¶ï¿½Ù£ï¿½
+    "deployKey"    varchar(64),           -- ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶
+    "deployedTime" timestamp,             -- ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+    "priority"     integer default 0 not null, -- ï¿½ï¿½ï¿½È¼ï¿½
+    "userId"       bigint not null,       -- ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½id
+    "editTime"     timestamp default CURRENT_TIMESTAMP not null, -- ï¿½à¼­Ê±ï¿½ï¿½
+    "createTime"   timestamp default CURRENT_TIMESTAMP not null, -- ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+    "updateTime"   timestamp default CURRENT_TIMESTAMP not null, -- ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+    "isDelete"     smallint default 0 not null, -- ï¿½Ç·ï¿½É¾ï¿½ï¿½
+    UNIQUE ("deployKey"), -- È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶Î¨Ò»
     CONSTRAINT "uk_deployKey" UNIQUE ("deployKey")
 );
 
--- Ìí¼ÓË÷Òı
-create index "idx_appName" on app ("appName"); -- ÌáÉı»ùÓÚÓ¦ÓÃÃû³ÆµÄ²éÑ¯ĞÔÄÜ
-create index "idx_userId" on app ("userId");   -- ÌáÉı»ùÓÚÓÃ»§ ID µÄ²éÑ¯ĞÔÄÜ
+-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+create index "idx_appName" on app ("appName"); -- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ÆµÄ²ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
+create index "idx_userId" on app ("userId");   -- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ ID ï¿½Ä²ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
 
--- Ìí¼Ó±í×¢ÊÍ
-comment on table app is 'Ó¦ÓÃ';
+-- ï¿½ï¿½Ó±ï¿½×¢ï¿½ï¿½
+comment on table app is 'Ó¦ï¿½ï¿½';
 comment on column app."id" is 'id';
-comment on column app."appName" is 'Ó¦ÓÃÃû³Æ';
-comment on column app."cover" is 'Ó¦ÓÃ·âÃæ';
-comment on column app."initPrompt" is 'Ó¦ÓÃ³õÊ¼»¯µÄ prompt';
-comment on column app."codeGenType" is '´úÂëÉú³ÉÀàĞÍ£¨Ã¶¾Ù£©';
-comment on column app."deployKey" is '²¿Êğ±êÊ¶';
-comment on column app."deployedTime" is '²¿ÊğÊ±¼ä';
-comment on column app."priority" is 'ÓÅÏÈ¼¶';
-comment on column app."userId" is '´´½¨ÓÃ»§id';
-comment on column app."editTime" is '±à¼­Ê±¼ä';
-comment on column app."createTime" is '´´½¨Ê±¼ä';
-comment on column app."updateTime" is '¸üĞÂÊ±¼ä';
-comment on column app."isDelete" is 'ÊÇ·ñÉ¾³ı';
+comment on column app."appName" is 'Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½';
+comment on column app."cover" is 'Ó¦ï¿½Ã·ï¿½ï¿½ï¿½';
+comment on column app."initPrompt" is 'Ó¦ï¿½Ã³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ prompt';
+comment on column app."codeGenType" is 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½Ã¶ï¿½Ù£ï¿½';
+comment on column app."deployKey" is 'ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶';
+comment on column app."deployedTime" is 'ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½';
+comment on column app."priority" is 'ï¿½ï¿½ï¿½È¼ï¿½';
+comment on column app."userId" is 'ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½id';
+comment on column app."editTime" is 'ï¿½à¼­Ê±ï¿½ï¿½';
+comment on column app."createTime" is 'ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½';
+comment on column app."updateTime" is 'ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½';
+comment on column app."isDelete" is 'ï¿½Ç·ï¿½É¾ï¿½ï¿½';
 
+-- å¯¹è¯å†å²è¡¨
+create table chat_history
+(
+    "id"          bigserial primary key, -- id
+    "message"     text not null,         -- æ¶ˆæ¯
+    "messageType" varchar(32) not null,  -- user/ai
+    "appId"       bigint not null,       -- åº”ç”¨id
+    "userId"      bigint not null,       -- åˆ›å»ºç”¨æˆ·id
+    "createTime"  timestamp default CURRENT_TIMESTAMP not null, -- åˆ›å»ºæ—¶é—´
+    "updateTime"  timestamp default CURRENT_TIMESTAMP not null, -- æ›´æ–°æ—¶é—´
+    "isDelete"    smallint default 0 not null, -- æ˜¯å¦åˆ é™¤
+    CONSTRAINT "chat_history_pkey" PRIMARY KEY ("id")
+);
+
+-- åˆ›å»ºç´¢å¼•
+create index "idx_appId" on chat_history ("appId");                       -- æå‡åŸºäºåº”ç”¨çš„æŸ¥è¯¢æ€§èƒ½
+create index "idx_createTime" on chat_history ("createTime");             -- æå‡åŸºäºæ—¶é—´çš„æŸ¥è¯¢æ€§èƒ½
+create index "idx_appId_createTime" on chat_history ("appId", "createTime"); -- æ¸¸æ ‡æŸ¥è¯¢æ ¸å¿ƒç´¢å¼•
+
+-- æ·»åŠ è¡¨æ³¨é‡Šå’Œåˆ—æ³¨é‡Š
+comment on table chat_history is 'å¯¹è¯å†å²';
+comment on column chat_history."id" is 'id';
+comment on column chat_history."message" is 'æ¶ˆæ¯';
+comment on column chat_history."messageType" is 'user/ai';
+comment on column chat_history."appId" is 'åº”ç”¨id';
+comment on column chat_history."userId" is 'åˆ›å»ºç”¨æˆ·id';
+comment on column chat_history."createTime" is 'åˆ›å»ºæ—¶é—´';
+comment on column chat_history."updateTime" is 'æ›´æ–°æ—¶é—´';
+comment on column chat_history."isDelete" is 'æ˜¯å¦åˆ é™¤';
