@@ -1,17 +1,19 @@
 package com.ckrey.ckreycodemother.controller;
 
+import com.ckrey.ckreycodemother.common.BaseResponse;
+import com.ckrey.ckreycodemother.common.ResponseUtil;
+import com.ckrey.ckreycodemother.model.entity.User;
+import com.ckrey.ckreycodemother.service.UserService;
 import com.mybatisflex.core.paginate.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import dev.langchain4j.agent.tool.P;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.ckrey.ckreycodemother.model.entity.ChatHistory;
 import com.ckrey.ckreycodemother.service.ChatHistoryService;
-import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -26,6 +28,9 @@ public class ChatHistoryController {
 
     @Autowired
     private ChatHistoryService chatHistoryService;
+
+    @Resource
+    private UserService userService;
 
     /**
      * 保存对话历史。
@@ -90,6 +95,17 @@ public class ChatHistoryController {
     @GetMapping("page")
     public Page<ChatHistory> page(Page<ChatHistory> page) {
         return chatHistoryService.page(page);
+    }
+
+
+    @GetMapping("/app/{appId}")
+    public BaseResponse<Page<ChatHistory>> listAppChatHistory(@PathVariable Long appId, @RequestParam(defaultValue = "10") int pageSize, @RequestParam LocalDateTime localDateTime, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+
+        Page<ChatHistory> chatHistoryPage = chatHistoryService.getChatHistoryPage(appId, pageSize, localDateTime, loginUser);
+
+        return ResponseUtil.success(chatHistoryPage);
+
     }
 
 }

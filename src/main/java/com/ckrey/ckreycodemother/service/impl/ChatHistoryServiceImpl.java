@@ -1,12 +1,16 @@
 package com.ckrey.ckreycodemother.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.exception.ThrowUtils;
+import com.ckrey.ckreycodemother.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.ckrey.ckreycodemother.model.entity.App;
+import com.ckrey.ckreycodemother.model.entity.User;
 import com.ckrey.ckreycodemother.model.enums.ChatHistoryMessageTypeEnum;
+import com.ckrey.ckreycodemother.model.enums.UserRoleEnum;
 import com.ckrey.ckreycodemother.service.AppService;
-import com.mybatisflex.core.query.QueryChain;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.ckrey.ckreycodemother.model.entity.ChatHistory;
@@ -15,7 +19,7 @@ import com.ckrey.ckreycodemother.service.ChatHistoryService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * 对话历史 服务层实现。
@@ -65,4 +69,72 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         queryWrapper.eq(ChatHistory::getAppId,appId);
         return this.remove(queryWrapper);
     }
+
+
+    /**
+     * 获取查询包装类
+     *
+     * @param chatHistoryQueryRequest
+     * @return
+     */
+    @Override
+    public QueryWrapper getQueryWrapper(ChatHistoryQueryRequest chatHistoryQueryRequest) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        if (chatHistoryQueryRequest == null) {
+            return queryWrapper;
+        }
+        Long id = chatHistoryQueryRequest.getId();
+        String message = chatHistoryQueryRequest.getMessage();
+        String messageType = chatHistoryQueryRequest.getMessageType();
+        Long appId = chatHistoryQueryRequest.getAppId();
+        Long userId = chatHistoryQueryRequest.getUserId();
+        LocalDateTime lastCreateTime = chatHistoryQueryRequest.getLastCreateTime();
+        String sortField = chatHistoryQueryRequest.getSortField();
+        String sortOrder = chatHistoryQueryRequest.getSortOrder();
+        // 拼接查询条件
+        queryWrapper.eq("id", id)
+                .like("message", message)
+                .eq("messageType", messageType)
+                .eq("appId", appId)
+                .eq("userId", userId);
+        // 游标查询逻辑 - 只使用 createTime 作为游标
+        if (lastCreateTime != null) {
+            queryWrapper.lt("createTime", lastCreateTime);
+        }
+        // 排序
+        if (StrUtil.isNotBlank(sortField)) {
+            queryWrapper.orderBy(sortField, "ascend".equals(sortOrder));
+        } else {
+            // 默认按创建时间降序排列
+            queryWrapper.orderBy("createTime", false);
+        }
+        return queryWrapper;
+    }
+
+
+    @Override
+    public Page<ChatHistory> getChatHistoryPage(Long appId, int pageSize, LocalDateTime lastCreateTime, User loginUser){
+
+        //参数校验
+        ThrowUtils.throwIf(appId == null || appId <=0,ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(pageSize <0 || pageSize >50,ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(loginUser == null,ErrorCode.PARAMS_ERROR);
+
+
+        App app = appService.getById(appId);
+        //只有本人或者管理员可以查看
+        boolean isAdmin = loginUser.getUserrole().equals(UserRoleEnum.ADMIN.getRole());
+        boolean isCreator = app.getUserId().equals(loginUser.getId());
+        ThrowUtils.throwIf(!isCreator && !isAdmin,ErrorCode.NO_AUTH_ERROR);
+        ChatHistoryQueryRequest chatHistoryQueryRequest = new ChatHistoryQueryRequest();
+        chatHistoryQueryRequest.setAppId(appId);
+        chatHistoryQueryRequest.setLastCreateTime(lastCreateTime);
+        chatHistoryQueryRequest.setUserId(loginUser.getId());
+
+        QueryWrapper queryWrapper = this.getQueryWrapper(chatHistoryQueryRequest);
+        //todo 一直从第一页开始查询，很简单理解，因为是游标查询，查询条件是改变的
+        return this.page(Page.of(1,pageSize),queryWrapper);
+
+    }
+
 }
