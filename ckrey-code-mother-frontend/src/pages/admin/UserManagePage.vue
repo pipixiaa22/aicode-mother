@@ -120,7 +120,7 @@ const pagination = computed(() => {
 })
 
 // 表格分页变化时的操作
-const doTableChange = (page: any) => {
+const doTableChange = (page: { current: number; pageSize: number }) => {
   searchParams.pageNum = page.current
   searchParams.pageSize = page.pageSize
   fetchData()
@@ -152,8 +152,10 @@ onMounted(() => {
   fetchData()
 })
 </script>
-
-<style>
+<style scoped>
 #userManagePage {
+  padding: 24px;
+  background: white;
+  margin-top: 16px;
 }
 </style>

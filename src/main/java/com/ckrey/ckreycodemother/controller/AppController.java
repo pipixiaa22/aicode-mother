@@ -55,7 +55,7 @@ public class AppController {
     private UserService userService;
 
 
-    @GetMapping(value = "/chat/gen/code/", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> chatToGenType(@RequestParam Long appId, @RequestParam String message, HttpServletRequest request) {
         if (appId == null || appId < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "appid错误");
