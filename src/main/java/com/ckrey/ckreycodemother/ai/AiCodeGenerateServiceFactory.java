@@ -1,5 +1,7 @@
 package com.ckrey.ckreycodemother.ai;
 
+import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.AiServices;
@@ -25,7 +27,6 @@ public class AiCodeGenerateServiceFactory {
                 .streamingChatModel(streamingChatModel)
                 .build();
     }
-
 
 
 }

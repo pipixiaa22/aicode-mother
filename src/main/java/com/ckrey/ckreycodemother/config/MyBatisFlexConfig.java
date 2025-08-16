@@ -10,8 +10,11 @@ public class MyBatisFlexConfig {
     @Bean
     public FlexGlobalConfig configurationCustomizer() {
         FlexGlobalConfig defaultConfig = FlexGlobalConfig.getDefaultConfig();
+
+
         defaultConfig.setNormalValueOfLogicDelete(false);
         defaultConfig.setDeletedValueOfLogicDelete(true);
         return defaultConfig;
     }
+
 }

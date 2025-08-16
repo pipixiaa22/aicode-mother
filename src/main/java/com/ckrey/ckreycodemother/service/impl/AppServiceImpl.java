@@ -24,6 +24,7 @@ import com.ckrey.ckreycodemother.mapper.AppMapper;
 import com.ckrey.ckreycodemother.service.AppService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -93,15 +94,15 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         String sortField = appQueryRequest.getSortField();
         String sortOrder = appQueryRequest.getSortOrder();
         return QueryWrapper.create()
-                .eq("id", id)
-                .like("appName", appName)
-                .like("cover", cover)
-                .like("initPrompt", initPrompt)
-                .eq("codeGenType", codeGenType)
-                .eq("deployKey", deployKey)
-                .eq("priority", priority)
-                .eq("userId", userId)
-                .orderBy(sortField, "ascend".equals(sortOrder));
+                .eq("\"id\"", id)
+                .like("\"appName\"", appName)
+                .like("\"cover\"", cover)
+                .like("\"initPrompt\"", initPrompt)
+                .eq("\"codeGenType\"", codeGenType)
+                .eq("\"deployKey\"", deployKey)
+                .eq("\"priority\"", priority)
+                .eq("\"userId\"", userId)
+                .orderBy("\"" + sortField + "\"", "ascend".equals(sortOrder));
     }
 
     @Override
@@ -156,7 +157,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
                     String aiResponse = stringBuilder.toString();
                     boolean aiMessage = chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
                     ThrowUtils.throwIf(!aiMessage, ErrorCode.OPERATION_ERROR, "存储ai消息失败");
-
                 }).doOnError(error -> {
                     String aiResponse = stringBuilder.toString();
                     chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());

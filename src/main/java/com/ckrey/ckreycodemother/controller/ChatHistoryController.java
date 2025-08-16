@@ -1,10 +1,16 @@
 package com.ckrey.ckreycodemother.controller;
 
+import com.ckrey.ckreycodemother.annotaion.AuthCheck;
 import com.ckrey.ckreycodemother.common.BaseResponse;
 import com.ckrey.ckreycodemother.common.ResponseUtil;
+import com.ckrey.ckreycodemother.constant.UserConstant;
+import com.ckrey.ckreycodemother.exception.ErrorCode;
+import com.ckrey.ckreycodemother.exception.ThrowUtils;
+import com.ckrey.ckreycodemother.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.ckrey.ckreycodemother.model.entity.User;
 import com.ckrey.ckreycodemother.service.UserService;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import dev.langchain4j.agent.tool.P;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -99,7 +105,7 @@ public class ChatHistoryController {
 
 
     @GetMapping("/app/{appId}")
-    public BaseResponse<Page<ChatHistory>> listAppChatHistory(@PathVariable Long appId, @RequestParam(defaultValue = "10") int pageSize, @RequestParam LocalDateTime localDateTime, HttpServletRequest request) {
+    public BaseResponse<Page<ChatHistory>> listAppChatHistory(@PathVariable Long appId, @RequestParam(defaultValue = "10") int pageSize, @RequestParam(required = false) LocalDateTime localDateTime, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
 
         Page<ChatHistory> chatHistoryPage = chatHistoryService.getChatHistoryPage(appId, pageSize, localDateTime, loginUser);
@@ -107,5 +113,25 @@ public class ChatHistoryController {
         return ResponseUtil.success(chatHistoryPage);
 
     }
+
+
+    /**
+     * 管理员分页查询所有对话历史
+     *
+     * @param chatHistoryQueryRequest 查询请求
+     * @return 对话历史分页
+     */
+    @PostMapping("/admin/list/page/vo")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Page<ChatHistory>> listAllChatHistoryByPageForAdmin(@RequestBody ChatHistoryQueryRequest chatHistoryQueryRequest) {
+        ThrowUtils.throwIf(chatHistoryQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        long pageNum = chatHistoryQueryRequest.getPageNum();
+        long pageSize = chatHistoryQueryRequest.getPageSize();
+        // 查询数据
+        QueryWrapper queryWrapper = chatHistoryService.getQueryWrapper(chatHistoryQueryRequest);
+        Page<ChatHistory> result = chatHistoryService.page(Page.of(pageNum, pageSize), queryWrapper);
+        return ResponseUtil.success(result);
+    }
+
 
 }

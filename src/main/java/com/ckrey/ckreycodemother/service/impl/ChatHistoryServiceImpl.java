@@ -17,6 +17,7 @@ import com.ckrey.ckreycodemother.model.entity.ChatHistory;
 import com.ckrey.ckreycodemother.mapper.ChatHistoryMapper;
 import com.ckrey.ckreycodemother.service.ChatHistoryService;
 import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory> implements ChatHistoryService {
 
     @Resource
+    @Lazy
     private AppService appService;
 
     @Override
@@ -94,19 +96,19 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         // 拼接查询条件
         queryWrapper.eq("id", id)
                 .like("message", message)
-                .eq("messageType", messageType)
-                .eq("appId", appId)
-                .eq("userId", userId);
+                .eq("\"messageType\"", messageType)  // 添加双引号
+                .eq("\"appId\"", appId)              // 添加双引号
+                .eq("\"userId\"", userId);           // 添加双引号
         // 游标查询逻辑 - 只使用 createTime 作为游标
         if (lastCreateTime != null) {
-            queryWrapper.lt("createTime", lastCreateTime);
+            queryWrapper.lt("\"createTime\"", lastCreateTime);
         }
         // 排序
         if (StrUtil.isNotBlank(sortField)) {
             queryWrapper.orderBy(sortField, "ascend".equals(sortOrder));
         } else {
             // 默认按创建时间降序排列
-            queryWrapper.orderBy("createTime", false);
+            queryWrapper.orderBy("\"createTime\"", false);
         }
         return queryWrapper;
     }
