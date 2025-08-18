@@ -63,6 +63,7 @@ public class StaticResourceController {
         }
     }
 
+
     /**
      * 根据文件扩展名返回带字符编码的 Content-Type
      */

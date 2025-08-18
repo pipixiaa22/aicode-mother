@@ -16,11 +16,16 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.ckrey.ckreycodemother.model.entity.ChatHistory;
 import com.ckrey.ckreycodemother.mapper.ChatHistoryMapper;
 import com.ckrey.ckreycodemother.service.ChatHistoryService;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.memory.ChatMemory;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 对话历史 服务层实现。
@@ -29,6 +34,7 @@ import java.time.LocalDateTime;
  * @since 2025-08-15
  */
 @Service
+@Slf4j
 public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory> implements ChatHistoryService {
 
     @Resource
@@ -138,5 +144,36 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         return this.page(Page.of(1,pageSize),queryWrapper);
 
     }
+
+    @Override
+    public int loadHistory(Long appId, ChatMemory chatMemory,int count){
+        try {
+            QueryWrapper wrapper = new QueryWrapper().eq(ChatHistory::getAppId, appId)
+                    .orderBy(ChatHistory::getCreateTime,false)
+                    .limit(1,count);
+            List<ChatHistory> list = this.list(wrapper);
+
+            list.reversed();
+
+            chatMemory.clear();
+
+            for (ChatHistory chatHistory : list) {
+                if (ChatHistoryMessageTypeEnum.AI.getValue().equals(chatHistory.getMessageType())){
+                    chatMemory.add(AiMessage.from(chatHistory.getMessage()));
+                }
+                else if (ChatHistoryMessageTypeEnum.USER.getValue().equals(chatHistory.getMessageType())){
+                    chatMemory.add(UserMessage.from(chatHistory.getMessage()));
+                }
+            }
+
+            log.info("成功加载appId:{}的历史对话记录{}条",appId,list.size());
+            return list.size();
+        } catch (Exception e) {
+            log.error("加载历史对话记录失败，appId为{},原因为：{}", appId,e.getMessage());
+            return 0;
+        }
+
+    }
+
 
 }

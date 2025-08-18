@@ -30,10 +30,26 @@
         <java.version>21</java.version>
     </properties>
     <dependencies>
+
+        <!-- Spring Session + Redis -->
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+        </dependency>
+
+
+
+        <!--        lanchain4j基于redis的上下文记忆-->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-community-redis-spring-boot-starter</artifactId>
             <version>1.1.0-beta7</version>
+        </dependency>
+
+<!--本地缓存，高级map用来隔离每个aiservice实现会话隔离-->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
 

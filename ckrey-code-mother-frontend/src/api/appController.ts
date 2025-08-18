@@ -76,13 +76,13 @@ export async function updateAppByAdmin(
   })
 }
 
-/** 此处后端没有提供注释 GET /app/chat/gen/code/ */
+/** 此处后端没有提供注释 GET /app/chat/gen/code */
 export async function chatToGenType(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.chatToGenTypeParams,
   options?: { [key: string]: any }
 ) {
-  return request<API.ServerSentEventString[]>('/app/chat/gen/code/', {
+  return request<API.ServerSentEventString[]>('/app/chat/gen/code', {
     method: 'GET',
     params: {
       ...params,
@@ -131,9 +131,9 @@ export async function getAppVo(
 }
 
 /** 此处后端没有提供注释 GET /app/getInfo/${param0} */
-export async function getInfo1(
+export async function getInfo2(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getInfo1Params,
+  params: API.getInfo2Params,
   options?: { [key: string]: any }
 ) {
   const { id: param0, ...queryParams } = params
@@ -160,7 +160,7 @@ export async function listGoodAppVoByPage(
 }
 
 /** 此处后端没有提供注释 GET /app/list */
-export async function list1(options?: { [key: string]: any }) {
+export async function list2(options?: { [key: string]: any }) {
   return request<API.App[]>('/app/list', {
     method: 'GET',
     ...(options || {}),
@@ -183,9 +183,9 @@ export async function listMyAppVoByPage(
 }
 
 /** 此处后端没有提供注释 GET /app/page */
-export async function page1(
+export async function page2(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.page1Params,
+  params: API.page2Params,
   options?: { [key: string]: any }
 ) {
   return request<API.PageApp>('/app/page', {
@@ -200,9 +200,9 @@ export async function page1(
 }
 
 /** 此处后端没有提供注释 DELETE /app/remove/${param0} */
-export async function remove1(
+export async function remove2(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.remove1Params,
+  params: API.remove2Params,
   options?: { [key: string]: any }
 ) {
   const { id: param0, ...queryParams } = params
@@ -214,7 +214,7 @@ export async function remove1(
 }
 
 /** 此处后端没有提供注释 POST /app/save */
-export async function save1(body: API.App, options?: { [key: string]: any }) {
+export async function save2(body: API.App, options?: { [key: string]: any }) {
   return request<boolean>('/app/save', {
     method: 'POST',
     headers: {
@@ -226,7 +226,7 @@ export async function save1(body: API.App, options?: { [key: string]: any }) {
 }
 
 /** 此处后端没有提供注释 PUT /app/update */
-export async function update1(body: API.App, options?: { [key: string]: any }) {
+export async function update2(body: API.App, options?: { [key: string]: any }) {
   return request<boolean>('/app/update', {
     method: 'PUT',
     headers: {

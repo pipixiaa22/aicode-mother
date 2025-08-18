@@ -123,6 +123,8 @@ public class AppController {
         app.setCodeGenType(CodeGenTypeEnum.MULTI_FILE.getValue());
         // 插入数据库
 
+        app.setInitPrompt(initPrompt);
+
         boolean result = appService.save(app);
 
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);

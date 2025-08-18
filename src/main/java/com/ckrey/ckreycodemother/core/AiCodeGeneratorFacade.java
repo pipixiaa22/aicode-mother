@@ -1,6 +1,7 @@
 package com.ckrey.ckreycodemother.core;
 
 import cn.hutool.core.util.StrUtil;
+import com.ckrey.ckreycodemother.ai.AiCodeGenerateServiceFactory;
 import com.ckrey.ckreycodemother.ai.AiCodeGeneratorService;
 import com.ckrey.ckreycodemother.ai.model.HtmlCodeResult;
 import com.ckrey.ckreycodemother.ai.model.MultiFileCodeResult;
@@ -22,7 +23,7 @@ import java.nio.file.Path;
 public class AiCodeGeneratorFacade {
 
     @Resource
-    private AiCodeGeneratorService aiCodeGeneratorService;
+    private AiCodeGenerateServiceFactory aiCodeGenerateServiceFactory;
 
 
     public Flux<String> codeGenerateAndSaveStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum,Long appId) {
@@ -34,6 +35,8 @@ public class AiCodeGeneratorFacade {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
         Flux<String> stringFlux = null;
+        //根据工厂类内的缓存获取ai服务实例
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGenerateServiceFactory.getAiCodeGeneratorService(appId);
 
         switch (codeGenTypeEnum) {
             case HTML -> {
@@ -53,6 +56,8 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数枚举为空");
         }
+
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGenerateServiceFactory.getAiCodeGeneratorService(appId);
 
         switch (codeGenTypeEnum) {
             case HTML -> {

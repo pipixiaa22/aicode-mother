@@ -77,12 +77,6 @@ declare namespace API {
     message?: string
   }
 
-  type BaseResponseHtmlCodeResult = {
-    code?: number
-    data?: HtmlCodeResult
-    message?: string
-  }
-
   type BaseResponseLoginUserVO = {
     code?: number
     data?: LoginUserVO
@@ -98,6 +92,12 @@ declare namespace API {
   type BaseResponsePageAppVO = {
     code?: number
     data?: PageAppVO
+    message?: string
+  }
+
+  type BaseResponsePageChatHistory = {
+    code?: number
+    data?: PageChatHistory
     message?: string
   }
 
@@ -125,8 +125,28 @@ declare namespace API {
     message?: string
   }
 
-  type chatParams = {
-    message: string
+  type ChatHistory = {
+    id?: number
+    message?: string
+    messageType?: string
+    appId?: number
+    userId?: number
+    createTime?: string
+    updateTime?: string
+    isDelete?: boolean
+  }
+
+  type ChatHistoryQueryRequest = {
+    pageNum?: number
+    pageSize?: number
+    sortField?: string
+    sortOrder?: string
+    id?: number
+    message?: string
+    messageType?: string
+    appId?: number
+    userId?: number
+    lastCreateTime?: string
   }
 
   type chatToGenTypeParams = {
@@ -154,6 +174,10 @@ declare namespace API {
     id: number
   }
 
+  type getInfo2Params = {
+    id: number
+  }
+
   type getInfoParams = {
     id: number
   }
@@ -166,9 +190,10 @@ declare namespace API {
     id: number
   }
 
-  type HtmlCodeResult = {
-    htmlCode?: string
-    description?: string
+  type listAppChatHistoryParams = {
+    appId: number
+    pageSize?: number
+    localDateTime?: string
   }
 
   type LoginUserVO = {
@@ -183,6 +208,10 @@ declare namespace API {
   }
 
   type page1Params = {
+    page: PageChatHistory
+  }
+
+  type page2Params = {
     page: PageApp
   }
 
@@ -197,6 +226,15 @@ declare namespace API {
 
   type PageAppVO = {
     records?: AppVO[]
+    pageNumber?: number
+    pageSize?: number
+    totalPage?: number
+    totalRow?: number
+    optimizeCountQuery?: boolean
+  }
+
+  type PageChatHistory = {
+    records?: ChatHistory[]
     pageNumber?: number
     pageSize?: number
     totalPage?: number
@@ -227,6 +265,10 @@ declare namespace API {
   }
 
   type remove1Params = {
+    id: number
+  }
+
+  type remove2Params = {
     id: number
   }
 
