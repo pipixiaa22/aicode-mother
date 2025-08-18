@@ -1,9 +1,15 @@
 package com.ckrey.ckreycodemother.ai;
 
+import com.ckrey.ckreycodemother.ai.tools.FileWriteTool;
+import com.ckrey.ckreycodemother.exception.BusinessException;
+import com.ckrey.ckreycodemother.exception.ErrorCode;
+import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.service.ChatHistoryService;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -14,8 +20,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
-import java.util.HashMap;
 
+/**
+ * AI 服务创建工厂
+ */
 @Configuration
 @Slf4j
 public class AiCodeGenerateServiceFactory {
@@ -24,7 +32,10 @@ public class AiCodeGenerateServiceFactory {
     private ChatModel chatModel;
 
     @Resource
-    private StreamingChatModel streamingChatModel;
+    private StreamingChatModel openAiStreamingChatModel;
+
+    @Resource
+    private StreamingChatModel reasoningStreamChatModel;
 
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
@@ -32,59 +43,104 @@ public class AiCodeGenerateServiceFactory {
     @Resource
     private ChatHistoryService chatHistoryService;
 
-//    private HashMap<Long, AiCodeGeneratorService> hashMap = new HashMap<>();
-//
-
-    private final Cache<Long, AiCodeGeneratorService> serviceCache = Caffeine.newBuilder()
+    /**
+     * AI 服务实例缓存
+     * 缓存策略：
+     * - 最大缓存 1000 个实例
+     * - 写入后 30 分钟过期
+     * - 访问后 10 分钟过期
+     */
+    private final Cache<String, AiCodeGeneratorService> serviceCache = Caffeine.newBuilder()
             .maximumSize(1000)
             .expireAfterWrite(Duration.ofMinutes(30))
             .expireAfterAccess(Duration.ofMinutes(10))
             .removalListener((key, value, cause) -> {
-                log.debug("AI 服务实例被移除，appId:{},原因:{}", key, cause);
-            }).build();
+                log.debug("AI 服务实例被移除，缓存键: {}, 原因: {}", key, cause);
+            })
+            .build();
 
-
+    /**
+     * 根据 appId 获取服务（为了兼容老逻辑）
+     *
+     * @param appId
+     * @return
+     */
     public AiCodeGeneratorService getAiCodeGeneratorService(long appId) {
-        return serviceCache.get(appId, (key) -> createAiCodeGeneratorService(appId));
+        return getAiCodeGeneratorService(appId, CodeGenTypeEnum.HTML);
     }
 
+    /**
+     * 根据 appId 获取服务
+     *
+     * @param appId       应用 id
+     * @param codeGenType 生成类型
+     * @return
+     */
+    public AiCodeGeneratorService getAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
+        String cacheKey = buildCacheKey(appId, codeGenType);
+        return serviceCache.get(cacheKey, key -> createAiCodeGeneratorService(appId, codeGenType));
+    }
 
-    private AiCodeGeneratorService createAiCodeGeneratorService(long appId) {
-        log.info("创建ai实例：{}", appId);
-
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
-                .chatMemoryStore(redisChatMemoryStore)
+    /**
+     * 创建新的 AI 服务实例
+     *
+     * @param appId       应用 id
+     * @param codeGenType 生成类型
+     * @return
+     */
+    private AiCodeGeneratorService createAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
+        log.info("为 appId: {} 创建新的 AI 服务实例", appId);
+        // 根据 appId 构建独立的对话记忆
+        MessageWindowChatMemory chatMemory = MessageWindowChatMemory
+                .builder()
                 .id(appId)
+                .chatMemoryStore(redisChatMemoryStore)
                 .maxMessages(20)
                 .build();
-
-        //加载对话历史到记忆中，就是从mysql加载到redis中
+        // 从数据库中加载对话历史到记忆中
         chatHistoryService.loadHistory(appId, chatMemory, 20);
-
-
-        return AiServices.builder(AiCodeGeneratorService.class)
-                .chatModel(chatModel)
-                .streamingChatModel(streamingChatModel)
-                .chatMemory(chatMemory)
-                .build();
-
-
+        return switch (codeGenType) {
+            // Vue 项目生成，使用工具调用和推理模型
+            case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
+                    .chatModel(chatModel)
+                    .streamingChatModel(reasoningStreamChatModel)
+                    .chatMemoryProvider(memoryId -> chatMemory)
+                    .tools(new FileWriteTool())
+                    // 处理工具调用幻觉问题
+                    .hallucinatedToolNameStrategy(toolExecutionRequest ->
+                            ToolExecutionResultMessage.from(toolExecutionRequest,
+                                    "Error: there is no tool called " + toolExecutionRequest.name())
+                    )
+                    .build();
+            // HTML 和 多文件生成，使用流式对话模型
+            case HTML, MULTI_FILE -> AiServices.builder(AiCodeGeneratorService.class)
+                    .chatModel(chatModel)
+                    .streamingChatModel(openAiStreamingChatModel)
+                    .chatMemory(chatMemory)
+                    .build();
+            default ->
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型: " + codeGenType.getValue());
+        };
     }
 
-
+    /**
+     * 创建 AI 代码生成器服务
+     *
+     * @return
+     */
     @Bean
     public AiCodeGeneratorService aiCodeGeneratorService() {
-//        return AiServices.builder(AiCodeGeneratorService.class)
-//                .chatModel(chatModel)
-//                .streamingChatModel(streamingChatModel)
-//                .chatMemoryProvider(memoryId -> MessageWindowChatMemory.builder()
-//                        .chatMemoryStore(redisChatMemoryStore)
-//                        .id(memoryId)
-//                        .maxMessages(20)
-//                        .build())
-//                .build();
         return getAiCodeGeneratorService(0);
     }
 
-
+    /**
+     * 构造缓存键
+     *
+     * @param appId
+     * @param codeGenType
+     * @return
+     */
+    private String buildCacheKey(long appId, CodeGenTypeEnum codeGenType) {
+        return appId + "_" + codeGenType.getValue();
+    }
 }

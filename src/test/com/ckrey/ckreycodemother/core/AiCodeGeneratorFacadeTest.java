@@ -1,5 +1,6 @@
 package com.ckrey.ckreycodemother.core;
 
+import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
@@ -23,12 +24,11 @@ class AiCodeGeneratorFacadeTest {
 
 
 
-
-
-
-
     @Test
     void codeGenerateAndSave() {
-
+        Flux<String> list = aiCodeGeneratorFacade.codeGenerateAndSaveStream("简单的任务记录网站，代码量不超过200行", CodeGenTypeEnum.VUE_PROJECT, 1L);
+        List<String> result = list.collectList().block();
+        String join = String.join("", result);
+        System.out.println(join);
     }
 }
