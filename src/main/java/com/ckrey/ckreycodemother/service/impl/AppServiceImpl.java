@@ -6,6 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
 import com.ckrey.ckreycodemother.core.constant.AppConstant;
+import com.ckrey.ckreycodemother.core.handler.StreamHandlerExecutor;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.exception.ThrowUtils;
@@ -61,6 +62,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private ChatHistoryService chatHistoryService;
+
+    @Resource
+    private StreamHandlerExecutor streamHandlerExecutor;
 
     @Override
     public AppVO getAppVo(App app) {
@@ -152,17 +156,23 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         //这里照样对flux流式处理
         Flux<String> stringFlux = aiCodeGeneratorFacade.codeGenerateAndSaveStream(userMessage, enumByValue, appId);
         StringBuilder stringBuilder = new StringBuilder();
-        return stringFlux.doOnNext(stringBuilder::append)
-                .doOnComplete(() -> {
-                    String aiResponse = stringBuilder.toString();
-                    boolean aiMessage = chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-                    ThrowUtils.throwIf(!aiMessage, ErrorCode.OPERATION_ERROR, "存储ai消息失败");
-                }).doOnError(error -> {
-                    String aiResponse = stringBuilder.toString();
-                    chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-                    error.printStackTrace();
-                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "ai 回复失败" + error.getMessage());
-                });
+
+        //统一封装为执行器根据枚举来进行解析
+
+        return streamHandlerExecutor.streamHandler(stringFlux, enumByValue, chatHistoryService, appId, loginUser);
+
+
+//        return stringFlux.doOnNext(stringBuilder::append)
+//                .doOnComplete(() -> {
+//                    String aiResponse = stringBuilder.toString();
+//                    boolean aiMessage = chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+//                    ThrowUtils.throwIf(!aiMessage, ErrorCode.OPERATION_ERROR, "存储ai消息失败");
+//                }).doOnError(error -> {
+//                    String aiResponse = stringBuilder.toString();
+//                    chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+//                    error.printStackTrace();
+//                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "ai 回复失败" + error.getMessage());
+//                });
 
     }
 
@@ -218,6 +228,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     /**
      * 关联删除app历史对话记录
+     *
      * @param id
      * @return
      */
@@ -226,7 +237,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         try {
             chatHistoryService.deleteChatMessage((Long) id);
         } catch (Exception e) {
-            log.error("删除历史对话记录失败,{}",e.getMessage());
+            log.error("删除历史对话记录失败,{}", e.getMessage());
         }
 
         return super.removeById(id);
