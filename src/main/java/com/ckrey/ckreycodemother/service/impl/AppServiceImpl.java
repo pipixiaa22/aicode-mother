@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
+import com.ckrey.ckreycodemother.core.builder.VueProjectBuilder;
 import com.ckrey.ckreycodemother.core.constant.AppConstant;
 import com.ckrey.ckreycodemother.core.handler.StreamHandlerExecutor;
 import com.ckrey.ckreycodemother.exception.BusinessException;
@@ -65,6 +66,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private StreamHandlerExecutor streamHandlerExecutor;
+
+    @Resource
+    private VueProjectBuilder vueProjectBuilder;
 
     @Override
     public AppVO getAppVo(App app) {
@@ -161,19 +165,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
         return streamHandlerExecutor.streamHandler(stringFlux, enumByValue, chatHistoryService, appId, loginUser);
 
-
-//        return stringFlux.doOnNext(stringBuilder::append)
-//                .doOnComplete(() -> {
-//                    String aiResponse = stringBuilder.toString();
-//                    boolean aiMessage = chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-//                    ThrowUtils.throwIf(!aiMessage, ErrorCode.OPERATION_ERROR, "存储ai消息失败");
-//                }).doOnError(error -> {
-//                    String aiResponse = stringBuilder.toString();
-//                    chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-//                    error.printStackTrace();
-//                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "ai 回复失败" + error.getMessage());
-//                });
-
     }
 
     @Override
@@ -204,6 +195,21 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
 
         String deploy_dir = AppConstant.CODE_DEPLOY_ROOT_DIR + File.separator + deployKey;
+
+
+        //对vue工程模式进行特殊处理，上面的方法都是通用,这里只需要将构建完成的dist目录下的文件复制到对应目录即可，本身就是一个html文件
+
+        if (codeGenType.equals(CodeGenTypeEnum.VUE_PROJECT.getValue())) {
+
+            boolean buildProject = vueProjectBuilder.buildProject(output_dir);
+            ThrowUtils.throwIf(!buildProject, ErrorCode.OPERATION_ERROR, "vue项目构建失败，请重试");
+            File distDir = new File(output_dir, "dist");
+            if (!distDir.exists()) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "dist目录不存在");
+            }
+            //这里直接将dist目录复制到部署目录即可
+            source = distDir;
+        }
 
         File target = new File(deploy_dir);
 
