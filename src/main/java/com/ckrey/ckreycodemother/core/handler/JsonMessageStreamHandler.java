@@ -6,7 +6,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.ckrey.ckreycodemother.ai.model.message.*;
 import com.ckrey.ckreycodemother.core.builder.VueProjectBuilder;
-import com.ckrey.ckreycodemother.core.constant.AppConstant;
+import com.ckrey.ckreycodemother.constant.AppConstant;
 import com.ckrey.ckreycodemother.model.entity.User;
 import com.ckrey.ckreycodemother.model.enums.ChatHistoryMessageTypeEnum;
 import com.ckrey.ckreycodemother.service.ChatHistoryService;

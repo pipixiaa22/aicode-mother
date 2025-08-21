@@ -6,7 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
 import com.ckrey.ckreycodemother.core.builder.VueProjectBuilder;
-import com.ckrey.ckreycodemother.core.constant.AppConstant;
+import com.ckrey.ckreycodemother.constant.AppConstant;
 import com.ckrey.ckreycodemother.core.handler.StreamHandlerExecutor;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
@@ -18,6 +18,7 @@ import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.model.vo.AppVO;
 import com.ckrey.ckreycodemother.model.vo.UserVO;
 import com.ckrey.ckreycodemother.service.ChatHistoryService;
+import com.ckrey.ckreycodemother.service.ScreenshotService;
 import com.ckrey.ckreycodemother.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -26,22 +27,15 @@ import com.ckrey.ckreycodemother.mapper.AppMapper;
 import com.ckrey.ckreycodemother.service.AppService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,6 +63,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private VueProjectBuilder vueProjectBuilder;
+
+    @Resource
+    private ScreenshotService screenshotService;
 
     @Override
     public AppVO getAppVo(App app) {
@@ -220,15 +217,33 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         }
         //重新写回app,填充deployid
         app.setDeployedTime(Timestamp.valueOf(LocalDateTime.now()));
-
         boolean update = this.updateById(app);
 
         if (!update) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "数据库更新失败");
         }
 
+        String path = StrUtil.format("{}/{}", AppConstant.CODE_DEPLOY_HOST, deployKey);
+        //异步调用截图服务并上传oss
+        generateAppScreenshotAsync(appId,path);
+
+
         //返回url地址
-        return StrUtil.format("{}/{}", AppConstant.CODE_DEPLOY_HOST, deployKey);
+        return path;
+    }
+
+    @Override
+    public void generateAppScreenshotAsync(long appId, String webUrl) {
+
+        Thread.startVirtualThread(() -> {
+            String coverPath = screenshotService.generateAndUploadScreenshot(webUrl);
+            App app = new App();
+            app.setId(appId);
+            app.setCover(coverPath);
+            boolean updated = this.updateById(app);
+            ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR, "数据库更新失败");
+        });
+
     }
 
 

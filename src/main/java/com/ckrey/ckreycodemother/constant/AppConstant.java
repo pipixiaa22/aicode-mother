@@ -1,4 +1,4 @@
-package com.ckrey.ckreycodemother.core.constant;
+package com.ckrey.ckreycodemother.constant;
 
 public interface AppConstant {
     Integer GOOD_APP_PRIORITY = 99;

@@ -1,6 +1,6 @@
 package com.ckrey.ckreycodemother.ai.tools;
 
-import com.ckrey.ckreycodemother.core.constant.AppConstant;
+import com.ckrey.ckreycodemother.constant.AppConstant;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolMemoryId;

@@ -71,13 +71,13 @@ public class VueProjectBuilder {
 
     private boolean executeNpmInstall(File projectDir){
         log.info("执行npm install 命令");
-        return executeCommand(projectDir, "npm install", 300);
+        return executeCommand(projectDir, "npm.cmd install", 300);
     }
 
 
     private boolean executeNpmBuild(File projectDir){
         log.info("执行npm run build 命令");
-        return executeCommand(projectDir,"npm run build",150);
+        return executeCommand(projectDir,"npm.cmd run build",150);
     }
 
 
@@ -111,6 +111,11 @@ public class VueProjectBuilder {
         }
 
 
+    }
+
+    public static void main(String[] args) {
+        VueProjectBuilder vueProjectBuilder = new VueProjectBuilder();
+        vueProjectBuilder.executeNpmInstall(new File("E:\\blog\\aicode-mother\\tmp\\code_output\\vue_project_315246425923108864"));
     }
 
 }

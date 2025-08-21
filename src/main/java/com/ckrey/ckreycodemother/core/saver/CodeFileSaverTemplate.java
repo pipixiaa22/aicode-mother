@@ -1,15 +1,13 @@
 package com.ckrey.ckreycodemother.core.saver;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.ckrey.ckreycodemother.core.constant.AppConstant;
+import com.ckrey.ckreycodemother.constant.AppConstant;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 
 import java.io.File;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
