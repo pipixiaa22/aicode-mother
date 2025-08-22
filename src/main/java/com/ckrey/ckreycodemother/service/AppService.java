@@ -1,6 +1,7 @@
 package com.ckrey.ckreycodemother.service;
 
 import com.ckrey.ckreycodemother.generator.Codegen;
+import com.ckrey.ckreycodemother.model.dto.app.AppAddRequest;
 import com.ckrey.ckreycodemother.model.dto.app.AppQueryRequest;
 import com.ckrey.ckreycodemother.model.entity.User;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
@@ -46,4 +47,6 @@ public interface AppService extends IService<App> {
 
 
     void generateAppScreenshotAsync(long appId, String webUrl);
+
+    Long createApp(AppAddRequest appAddRequest,User loginUser);
 }

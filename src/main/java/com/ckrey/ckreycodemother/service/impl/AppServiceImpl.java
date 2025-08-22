@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.ckrey.ckreycodemother.ai.AiCodeRouterService;
 import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
 import com.ckrey.ckreycodemother.core.builder.VueProjectBuilder;
 import com.ckrey.ckreycodemother.constant.AppConstant;
@@ -11,6 +12,7 @@ import com.ckrey.ckreycodemother.core.handler.StreamHandlerExecutor;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.exception.ThrowUtils;
+import com.ckrey.ckreycodemother.model.dto.app.AppAddRequest;
 import com.ckrey.ckreycodemother.model.dto.app.AppQueryRequest;
 import com.ckrey.ckreycodemother.model.entity.User;
 import com.ckrey.ckreycodemother.model.enums.ChatHistoryMessageTypeEnum;
@@ -66,6 +68,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private ScreenshotService screenshotService;
+
+    @Resource
+    private AiCodeRouterService aiCodeRouterService;
 
     @Override
     public AppVO getAppVo(App app) {
@@ -244,6 +249,22 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR, "数据库更新失败");
         });
 
+    }
+
+    @Override
+    public Long createApp(AppAddRequest appAddRequest, User loginUser) {
+        String initPrompt = appAddRequest.getInitPrompt();
+        ThrowUtils.throwIf(StrUtil.isBlank(initPrompt),ErrorCode.PARAMS_ERROR,"初始提示词不能为空");
+        App app = new App();
+        app.setUserId(loginUser.getId());
+        app.setInitPrompt(initPrompt);
+        CodeGenTypeEnum codeGenTypeEnum = aiCodeRouterService.router(initPrompt);
+        app.setCodeGenType(codeGenTypeEnum.getValue());
+
+        boolean save = this.save(app);
+        ThrowUtils.throwIf(!save,ErrorCode.OPERATION_ERROR,"app实例插入失败");
+        log.info("app实例生成：{}",app.getId());
+        return app.getId();
     }
 
 

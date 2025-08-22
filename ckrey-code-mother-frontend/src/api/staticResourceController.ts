@@ -15,11 +15,3 @@ export async function serveStaticResource(
     ...(options || {}),
   })
 }
-
-/** 此处后端没有提供注释 GET /static/test */
-export async function test1(options?: { [key: string]: any }) {
-  return request<string>('/static/test', {
-    method: 'GET',
-    ...(options || {}),
-  })
-}
