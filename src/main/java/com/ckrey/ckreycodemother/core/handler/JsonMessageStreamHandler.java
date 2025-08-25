@@ -5,6 +5,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.ckrey.ckreycodemother.ai.model.message.*;
+import com.ckrey.ckreycodemother.ai.tools.BaseTool;
+import com.ckrey.ckreycodemother.ai.tools.ToolManager;
 import com.ckrey.ckreycodemother.core.builder.VueProjectBuilder;
 import com.ckrey.ckreycodemother.constant.AppConstant;
 import com.ckrey.ckreycodemother.model.entity.User;
@@ -29,6 +31,9 @@ public class JsonMessageStreamHandler {
 
     @Resource
     private VueProjectBuilder vueProjectBuilder;
+
+    @Resource
+    private ToolManager toolManager;
 
     /**
      * 处理 TokenStream（VUE_PROJECT）
@@ -91,9 +96,10 @@ public class JsonMessageStreamHandler {
                 String toolId = toolRequestMessage.getId();
                 // 检查是否是第一次看到这个工具 ID
                 if (toolId != null && !seenToolIds.contains(toolId)) {
+                    BaseTool tool = toolManager.getTool(toolRequestMessage.getName());
                     // 第一次调用这个工具，记录 ID 并完整返回工具信息
                     seenToolIds.add(toolId);
-                    return "\n\n[选择工具] 写入文件\n\n";
+                    return tool.generateToolRequestResponse();
                 } else {
                     // 不是第一次调用这个工具，直接返回空
                     return "";
@@ -103,16 +109,8 @@ public class JsonMessageStreamHandler {
                 ToolExecutedMessage toolExecutedMessage = JSONUtil.toBean(chunk, ToolExecutedMessage.class);
                 //将args传来的参数解析成json
                 JSONObject jsonObject = JSONUtil.parseObj(toolExecutedMessage.getArguments());
-                String relativeFilePath = jsonObject.getStr("relativeFilePath");
-                String suffix = FileUtil.getSuffix(relativeFilePath);
-                String content = jsonObject.getStr("content");
-                String result = String.format("""
-                        [工具调用] 写入文件 %s
-                        ```%s
-                        %s
-                        ```
-                        """, relativeFilePath, suffix, content);
-                // 输出前端和要持久化的内容
+                BaseTool tool = toolManager.getTool(toolExecutedMessage.getName());
+                String result = tool.generateToolExecutedResult(jsonObject);
                 String output = String.format("\n\n%s\n\n", result);
                 chatHistoryStringBuilder.append(output);
                 return output;

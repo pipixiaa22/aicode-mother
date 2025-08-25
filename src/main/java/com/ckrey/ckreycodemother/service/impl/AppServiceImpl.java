@@ -177,6 +177,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         if (!app.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限部署该应用");
         }
+        log.info("开始进行部署:{}",appId);
         //检查是否已有部署deploykey,如果有,则直接在此基础上修改,如果没有生成一个并回填
         String deployKey = app.getDeployKey();
         if (StrUtil.isBlank(deployKey)) {
@@ -217,6 +218,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
         try {
             FileUtil.copyContent(source, target, true);
+            log.info("文件复制完成，{}->{}",source,target);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
         }
@@ -258,6 +260,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         App app = new App();
         app.setUserId(loginUser.getId());
         app.setInitPrompt(initPrompt);
+        app.setAppName(initPrompt.substring(0,10));
         CodeGenTypeEnum codeGenTypeEnum = aiCodeRouterService.router(initPrompt);
         app.setCodeGenType(codeGenTypeEnum.getValue());
 

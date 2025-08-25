@@ -70,14 +70,23 @@ public class VueProjectBuilder {
 
 
     private boolean executeNpmInstall(File projectDir){
+        String command = String.format("%s install",buildCommand());
         log.info("执行npm install 命令");
-        return executeCommand(projectDir, "npm.cmd install", 300);
+        return executeCommand(projectDir, command, 300);
+    }
+
+    private String buildCommand(){
+        if (System.getProperty("os.name").equals("Windows")) {
+            return "npm.cmd";
+        }
+        return "npm";
     }
 
 
     private boolean executeNpmBuild(File projectDir){
+        String command = String.format("%s run build",buildCommand());
         log.info("执行npm run build 命令");
-        return executeCommand(projectDir,"npm.cmd run build",150);
+        return executeCommand(projectDir,command,150);
     }
 
 
@@ -114,8 +123,10 @@ public class VueProjectBuilder {
     }
 
     public static void main(String[] args) {
+        System.out.println(System.getProperty("os.name"));
         VueProjectBuilder vueProjectBuilder = new VueProjectBuilder();
-        vueProjectBuilder.executeNpmInstall(new File("E:\\blog\\aicode-mother\\tmp\\code_output\\vue_project_315246425923108864"));
+        File file = new File("/home/ckrey/IdeaProjects/ckrey-code-mother/tmp/code_output/vue_project_316408203553247232");
+        vueProjectBuilder.executeCommand(file,"npm install",300);
     }
 
 }

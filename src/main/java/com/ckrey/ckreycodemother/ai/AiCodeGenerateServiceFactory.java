@@ -1,6 +1,6 @@
 package com.ckrey.ckreycodemother.ai;
 
-import com.ckrey.ckreycodemother.ai.tools.FileWriteTool;
+import com.ckrey.ckreycodemother.ai.tools.*;
 import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
@@ -42,6 +42,9 @@ public class AiCodeGenerateServiceFactory {
 
     @Resource
     private ChatHistoryService chatHistoryService;
+
+    @Resource
+    private ToolManager toolManager;
 
     /**
      * AI 服务实例缓存
@@ -105,7 +108,7 @@ public class AiCodeGenerateServiceFactory {
                     .chatModel(chatModel)
                     .streamingChatModel(reasoningStreamChatModel)
                     .chatMemoryProvider(memoryId -> chatMemory)
-                    .tools(new FileWriteTool())
+                    .tools(toolManager.getAllTools())
                     // 处理工具调用幻觉问题
                     .hallucinatedToolNameStrategy(toolExecutionRequest ->
                             ToolExecutionResultMessage.from(toolExecutionRequest,
