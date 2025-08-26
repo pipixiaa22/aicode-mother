@@ -8,6 +8,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import spi.Ckrey;
 
 import java.lang.reflect.Field;

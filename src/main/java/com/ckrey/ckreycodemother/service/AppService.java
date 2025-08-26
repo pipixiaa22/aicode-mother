@@ -1,10 +1,8 @@
 package com.ckrey.ckreycodemother.service;
 
-import com.ckrey.ckreycodemother.generator.Codegen;
 import com.ckrey.ckreycodemother.model.dto.app.AppAddRequest;
 import com.ckrey.ckreycodemother.model.dto.app.AppQueryRequest;
 import com.ckrey.ckreycodemother.model.entity.User;
-import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.model.vo.AppVO;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;

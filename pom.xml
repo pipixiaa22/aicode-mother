@@ -31,10 +31,24 @@
     </properties>
     <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/com.alibaba/dashscope-sdk-java -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dashscope-sdk-java</artifactId>
+            <version>2.21.5</version>
+        </dependency>
+
         <!-- Spring Session + Redis -->
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-redis</artifactId>
+        </dependency>
+
+        <!-- LangGraph4j -->
+        <dependency>
+            <groupId>org.bsc.langgraph4j</groupId>
+            <artifactId>langgraph4j-core</artifactId>
+            <version>1.6.0-rc2</version>
         </dependency>
 
 
