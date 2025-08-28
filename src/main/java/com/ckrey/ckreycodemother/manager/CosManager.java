@@ -44,17 +44,17 @@ public class CosManager {
      * @param file 要上传的文件
      * @return 文件的访问URL，失败返回null
      */
-    public String uploadFile(String key, File file) {
-        // 上传文件
-        PutObjectResult result = putObject(key, file);
-        if (result != null) {
-            // 构建访问URL，路径
-            String url = String.format("%s%s", cosClientConfig.getHost(), key);
-            log.info("文件上传COS成功: {} -> {}", file.getName(), url);
-            return url;
-        } else {
-            log.error("文件上传COS失败，返回结果为空");
-            return null;
-        }
+        public String uploadFile(String key, File file) {
+            // 上传文件
+            PutObjectResult result = putObject(key, file);
+            if (result != null) {
+                // 构建访问URL，路径
+                String url = String.format("%s%s", cosClientConfig.getHost(), key);
+                log.info("文件上传COS成功: {} -> {}", file.getName(), url);
+                return url;
+            } else {
+                log.error("文件上传COS失败，返回结果为空");
+                return null;
+            }
     }
 }
