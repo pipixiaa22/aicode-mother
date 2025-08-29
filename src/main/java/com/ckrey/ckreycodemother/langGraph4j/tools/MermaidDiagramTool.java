@@ -27,7 +27,7 @@ public class MermaidDiagramTool {
 
     @Resource
     private CosManager cosManager;
-    
+
     @Tool("将 Mermaid 代码转换为架构图图片，用于展示系统结构和技术关系")
     public List<ImageResource> generateMermaidDiagram(@P("Mermaid 图表代码") String mermaidCode,
                                                       @P("架构图描述") String description) {
@@ -68,6 +68,7 @@ public class MermaidDiagramTool {
         // 根据操作系统选择命令
         String command = SystemUtil.getOsInfo().isWindows() ? "mmdc.cmd" : "mmdc";
         // 构建命令
+//        String command = "~/.local/share/pnpm/mmdc";
         String cmdLine = String.format("%s -i %s -o %s -b transparent",
                 command,
                 tempInputFile.getAbsolutePath(),

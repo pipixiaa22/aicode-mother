@@ -1,6 +1,7 @@
 package com.ckrey.ckreycodemother.langGraph4j.state;
 
 import com.ckrey.ckreycodemother.langGraph4j.model.ImageResource;
+import com.ckrey.ckreycodemother.langGraph4j.model.QualityResult;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,12 +75,19 @@ public class WorkflowContext implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 质量检查结果
+     */
+    private QualityResult qualityResult;
+
+
     // ========== 上下文操作方法 ==========
 
     /**
      * 从 MessagesState 中获取 WorkflowContext
      */
     public static WorkflowContext getContext(MessagesState<String> state) {
+
         return (WorkflowContext) state.data().get(WORKFLOW_CONTEXT_KEY);
     }
 
