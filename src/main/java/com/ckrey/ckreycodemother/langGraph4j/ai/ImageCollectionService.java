@@ -1,7 +1,10 @@
 package com.ckrey.ckreycodemother.langGraph4j.ai;
 
+import com.ckrey.ckreycodemother.langGraph4j.model.ImageResource;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
+
+import java.util.List;
 
 /**
  * 图片收集 AI 服务接口
@@ -14,8 +17,5 @@ public interface ImageCollectionService {
      * AI 会根据需求自主选择调用相应的工具
      */
     @SystemMessage(fromResource = "prompt/image-collection-system-prompt.txt")
-    String collectImages(@UserMessage String userPrompt);
-
-
-
+   String collectImages(@UserMessage String userPrompt);
 }
