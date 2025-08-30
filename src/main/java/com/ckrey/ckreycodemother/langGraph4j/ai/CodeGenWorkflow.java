@@ -52,7 +52,6 @@ public class CodeGenWorkflow {
                                     "skip_build", END,            // 质检通过但跳过构建
                                     "fail", "code_generator"      // 质检失败，重新生成
                             ))
-
                     .addEdge("project_builder", END)
 
                     // 编译工作流
