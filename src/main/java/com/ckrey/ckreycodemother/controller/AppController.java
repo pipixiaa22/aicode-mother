@@ -3,7 +3,6 @@ package com.ckrey.ckreycodemother.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.ckrey.ckreycodemother.ai.AiCodeRouterService;
 import com.ckrey.ckreycodemother.annotaion.AuthCheck;
 import com.ckrey.ckreycodemother.common.BaseResponse;
 import com.ckrey.ckreycodemother.model.dto.app.*;
@@ -14,9 +13,7 @@ import com.ckrey.ckreycodemother.exception.BusinessException;
 import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.exception.ThrowUtils;
 import com.ckrey.ckreycodemother.model.entity.User;
-import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.model.vo.AppVO;
-import com.ckrey.ckreycodemother.service.ChatHistoryService;
 import com.ckrey.ckreycodemother.service.ProjectDownloadService;
 import com.ckrey.ckreycodemother.service.UserService;
 import com.mybatisflex.core.paginate.Page;
@@ -24,6 +21,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -238,6 +236,9 @@ public class AppController {
     }
 
 
+    @Cacheable(value = "good_app_page",key = "T(com.ckrey.ckreycodemother.utils.CacheKeyUtils).getCacheKey(#appQueryRequest)",
+            condition = "#appQueryRequest.pageSize <= 10"
+    )
     @PostMapping("/good/list/page/vo")
     public BaseResponse<Page<AppVO>> listGoodAppVoByPage(@RequestBody AppQueryRequest appQueryRequest) {
         appQueryRequest.setPriority(AppConstant.GOOD_APP_PRIORITY);

@@ -108,14 +108,14 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         String sortField = appQueryRequest.getSortField();
         String sortOrder = appQueryRequest.getSortOrder();
         return QueryWrapper.create()
-                .eq("\"id\"", id)
-                .like("\"appName\"", appName)
-                .like("\"cover\"", cover)
-                .like("\"initPrompt\"", initPrompt)
-                .eq("\"codeGenType\"", codeGenType)
-                .eq("\"deployKey\"", deployKey)
-                .eq("\"priority\"", priority)
-                .eq("\"userId\"", userId)
+                .eq("\"id\"", id,id!=null)
+                .like("\"appName\"", appName,appName!=null)
+                .like("\"cover\"", cover,cover!=null)
+                .like("\"initPrompt\"", initPrompt,initPrompt!=null)
+                .eq("\"codeGenType\"", codeGenType,codeGenType!=null)
+                .eq("\"deployKey\"", deployKey,deployKey!=null)
+                .eq("\"priority\"", priority,priority!=null)
+                .eq("\"userId\"", userId,userId!=null)
                 .orderBy("\"" + sortField + "\"", "ascend".equals(sortOrder));
     }
 
@@ -164,11 +164,11 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
         //发送请求到ai服务器
         //这里照样对flux流式处理
+        //这里是获取ai响应
         Flux<String> stringFlux = aiCodeGeneratorFacade.codeGenerateAndSaveStream(userMessage, enumByValue, appId);
-        StringBuilder stringBuilder = new StringBuilder();
 
         //统一封装为执行器根据枚举来进行解析
-
+        //对ai响应进行解析
         return streamHandlerExecutor.streamHandler(stringFlux, enumByValue, chatHistoryService, appId, loginUser);
 
     }

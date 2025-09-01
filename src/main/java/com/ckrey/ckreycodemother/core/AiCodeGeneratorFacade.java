@@ -9,6 +9,8 @@ import com.ckrey.ckreycodemother.ai.model.MultiFileCodeResult;
 import com.ckrey.ckreycodemother.ai.model.message.AiResponseMessage;
 import com.ckrey.ckreycodemother.ai.model.message.ToolExecutedMessage;
 import com.ckrey.ckreycodemother.ai.model.message.ToolRequestMessage;
+import com.ckrey.ckreycodemother.constant.AppConstant;
+import com.ckrey.ckreycodemother.core.builder.VueProjectBuilder;
 import com.ckrey.ckreycodemother.core.parser.CodeParserExecutor;
 import com.ckrey.ckreycodemother.core.saver.CodeFileSaverExecutor;
 import com.ckrey.ckreycodemother.exception.BusinessException;
@@ -19,6 +21,7 @@ import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -31,6 +34,9 @@ public class AiCodeGeneratorFacade {
 
     @Resource
     private AiCodeGenerateServiceFactory aiCodeGenerateServiceFactory;
+
+    @Autowired
+    private VueProjectBuilder vueProjectBuilder;
 
 
     /**
@@ -63,7 +69,7 @@ public class AiCodeGeneratorFacade {
             }
             case VUE_PROJECT -> {
                 TokenStream codeStream = aiCodeGeneratorService.generateVueProjectCodeStream(appId, userMessage);
-                yield processTokenStream(codeStream);
+                yield processTokenStream(codeStream,appId);
             }
             default -> {
                 String errorMessage = "不支持的生成类型：" + codeGenTypeEnum.getValue();
@@ -128,7 +134,7 @@ public class AiCodeGeneratorFacade {
      * @param tokenStream
      * @return
      */
-    private Flux<String> processTokenStream(TokenStream tokenStream) {
+    private Flux<String> processTokenStream(TokenStream tokenStream,Long appId) {
         return Flux.create(sink -> {
             tokenStream.onPartialResponse((String partialResponse) -> {
                         AiResponseMessage aiResponseMessage = new AiResponseMessage(partialResponse);
@@ -143,6 +149,10 @@ public class AiCodeGeneratorFacade {
                         sink.next(JSONUtil.toJsonStr(toolExecutedMessage));
                     })
                     .onCompleteResponse((ChatResponse response) -> {
+                        String projectPath = AppConstant.CODE_OUTPUT_ROOT_DIR + "/vue_project_" + appId;
+                        //同步执行
+                        vueProjectBuilder.buildProject(projectPath);
+
                         sink.complete();
                     })
                     .onError((Throwable error) -> {
