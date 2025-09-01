@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ckrey.ckreycodemother.ai.AiCodeRouterService;
+import com.ckrey.ckreycodemother.ai.AiCodeRouterServiceFactory;
 import com.ckrey.ckreycodemother.core.AiCodeGeneratorFacade;
 import com.ckrey.ckreycodemother.core.builder.VueProjectBuilder;
 import com.ckrey.ckreycodemother.constant.AppConstant;
@@ -68,9 +69,12 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private ScreenshotService screenshotService;
+//
+//    @Resource
+//    private AiCodeRouterService aiCodeRouterService;
 
     @Resource
-    private AiCodeRouterService aiCodeRouterService;
+    private AiCodeRouterServiceFactory aiCodeRouterServiceFactory;
 
     @Override
     public AppVO getAppVo(App app) {
@@ -261,6 +265,10 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         app.setUserId(loginUser.getId());
         app.setInitPrompt(initPrompt);
         app.setAppName(initPrompt.substring(0,10));
+        //通过ai路由判断本次提示词是哪种模式
+//        aiCodeRouterService.router()
+        //每次请求获取新的实例
+        AiCodeRouterService aiCodeRouterService = aiCodeRouterServiceFactory.createAiCodeRouterService();
         CodeGenTypeEnum codeGenTypeEnum = aiCodeRouterService.router(initPrompt);
         app.setCodeGenType(codeGenTypeEnum.getValue());
 

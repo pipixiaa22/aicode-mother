@@ -1,6 +1,7 @@
 package com.ckrey.ckreycodemother.langGraph4j.node;
 
 import com.ckrey.ckreycodemother.ai.AiCodeRouterService;
+import com.ckrey.ckreycodemother.ai.AiCodeRouterServiceFactory;
 import com.ckrey.ckreycodemother.langGraph4j.state.WorkflowContext;
 import com.ckrey.ckreycodemother.model.enums.CodeGenTypeEnum;
 import com.ckrey.ckreycodemother.utils.SpringContextUtil;
@@ -21,7 +22,9 @@ public class RouterNode {
             CodeGenTypeEnum generationType;
             try {
                 // 获取AI路由服务，是根据aware接口获取容器里面的信息然后调用对应实例
-                AiCodeRouterService routingService = SpringContextUtil.getBean(AiCodeRouterService.class);
+                // 获取AI路由服务工厂并创建新的路由服务实例
+                AiCodeRouterServiceFactory factory = SpringContextUtil.getBean(AiCodeRouterServiceFactory.class);
+                AiCodeRouterService routingService = factory.createAiCodeRouterService();
                 // 根据原始提示词进行智能路由
                 generationType = routingService.router(context.getOriginalPrompt());
                 log.info("AI智能路由完成，选择类型: {} ({})", generationType.getValue(), generationType.getText());

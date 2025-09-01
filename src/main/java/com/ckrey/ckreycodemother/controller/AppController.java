@@ -54,13 +54,8 @@ public class AppController {
     @Resource
     private UserService userService;
 
-    private ChatHistoryService chatHistoryService;
-
     @Resource
     private ProjectDownloadService projectDownloadService;
-
-    @Resource
-    private AiCodeRouterService aiCodeRouterService;
 
 
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
