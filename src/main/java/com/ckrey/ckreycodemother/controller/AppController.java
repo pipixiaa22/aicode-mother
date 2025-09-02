@@ -14,6 +14,8 @@ import com.ckrey.ckreycodemother.exception.ErrorCode;
 import com.ckrey.ckreycodemother.exception.ThrowUtils;
 import com.ckrey.ckreycodemother.model.entity.User;
 import com.ckrey.ckreycodemother.model.vo.AppVO;
+import com.ckrey.ckreycodemother.ratelimit.annotaion.RateLimit;
+import com.ckrey.ckreycodemother.ratelimit.enums.RateLimitType;
 import com.ckrey.ckreycodemother.service.ProjectDownloadService;
 import com.ckrey.ckreycodemother.service.UserService;
 import com.mybatisflex.core.paginate.Page;
@@ -56,6 +58,8 @@ public class AppController {
     private ProjectDownloadService projectDownloadService;
 
 
+
+    @RateLimit(rate = 5,rateInterval = 60,limitType = RateLimitType.USER)
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> chatToGenType(@RequestParam Long appId, @RequestParam String message, HttpServletRequest request) {
         if (appId == null || appId < 0) {
